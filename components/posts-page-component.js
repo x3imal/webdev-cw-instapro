@@ -1,6 +1,6 @@
 import { USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
-import { posts, goToPage, user} from "../index.js";
+import { posts, goToPage, user } from "../index.js";
 
 const escapeHtml = (s = "") =>
     s.replace(/[&<>'"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", "\"": "&quot;" }[c]));
@@ -14,51 +14,62 @@ const timeAgo = (iso) => {
     if (m < 60) return `${m} мин. назад`;
     const h = Math.floor(m / 60);
     if (h < 24) return `${h} ч. назад`;
-    const day = Math.floor(h / 24);
-    return `${day} дн. назад`;
+    const days = Math.floor(h / 24);
+    if (days < 7) return `${days} дн. назад`;
+    return d.toLocaleDateString();
 };
 
 export function renderPostsPageComponent({ appEl }) {
-    const listHtml = posts
-        .map((post) => {
-            const likeCount = Array.isArray(post.likes) ? post.likes.length : 0;
-            const isLiked =
-                typeof post.isLiked === "boolean"
-                    ? post.isLiked
-                    : Array.isArray(post.likes) && user ? post.likes.some((u) => u.id === user.id) : false;
+    const listHtml =
+        posts.length === 0
+            ? `<li class="post post--empty">У пользователя пока нет постов.</li>`
+            : posts
+                .map((post) => {
+                    const isLiked = !!post.isLiked;
+                    const you = user?.user?.id && post.user.id === user.user.id;
+                    return `
+          <li class="post" data-id="${post.id}">
+            <div class="post-header" data-user-id="${post.user.id}">
+              <img src="${post.user.imageUrl}" class="post-header__user-image" alt="${escapeHtml(post.user.name)}">
+              <p class="post-header__user-name" data-user-id="${post.user.id}">
+                ${escapeHtml(post.user.name)}${you ? " (я)" : ""}
+              </p>
+            </div>
 
-            return `
-        <li class="post" data-id="${post.id}">
-          <div class="post-header" data-user-id="${post.user.id}">
-            <img src="${post.user.imageUrl}" class="post-header__user-image" alt="${escapeHtml(post.user.name)}">
-            <p class="post-header__user-name" data-user-id="${post.user.id}">${escapeHtml(post.user.name)}</p>
-          </div>
+            <div class="post-image-container">
+              <img class="post-image" src="${post.imageUrl}" alt="post">
+            </div>
 
-          <div class="post-image-container">
-            <img class="post-image" src="${post.imageUrl}" alt="post">
-          </div>
+            <div class="post-likes">
+              <button
+                data-post-id="${post.id}"
+                class="like-button"
+                aria-pressed="${isLiked ? "true" : "false"}"
+                title="${isLiked ? "Убрать лайк" : "Поставить лайк"}"
+              >
+                <img
+                  src="./assets/images/${isLiked ? "like-active.svg" : "like-not-active.svg"}"
+                  class="like-icon"
+                  alt="${isLiked ? "liked" : "not liked"}"
+                >
+              </button>
+              <p class="post-likes-text">
+                Нравится: <strong>${post.likes.length}</strong>
+              </p>
+            </div>
 
-          <div class="post-likes">
-            <button data-post-id="${post.id}" class="like-button" aria-pressed="${isLiked ? "true" : "false"}" title="${isLiked ? "Убрать лайк" : "Поставить лайк"}">
-              <img src="./assets/images/${isLiked ? "like-active.svg" : "like-not-active.svg"}" class="like-icon" alt="${isLiked ? "liked" : "not liked"}">
-            </button>
-            <p class="post-likes-text">
-              Нравится: <strong>${likeCount}</strong>
+            <p class="post-text">
+              <span class="user-name" data-user-id="${post.user.id}">${escapeHtml(post.user.name)}</span>
+              ${escapeHtml(post.description || "")}
             </p>
-          </div>
 
-          <p class="post-text">
-            <span class="user-name" data-user-id="${post.user.id}">${escapeHtml(post.user.name)}</span>
-            ${escapeHtml(post.description || "")}
-          </p>
-
-          <p class="post-date">
-            ${timeAgo(post.createdAt)}
-          </p>
-        </li>
-      `;
-        })
-        .join("");
+            <p class="post-date">
+              ${timeAgo(post.createdAt)}
+            </p>
+          </li>
+        `;
+                })
+                .join("");
 
     const appHtml = `
     <div class="page-container">
@@ -66,24 +77,23 @@ export function renderPostsPageComponent({ appEl }) {
       <ul class="posts">
         ${listHtml}
       </ul>
-    </div>`;
+    </div>
+  `;
 
     appEl.innerHTML = appHtml;
 
     renderHeaderComponent({
-        element: document.querySelector(".header-container"),
+        element: appEl.querySelector(".header-container"),
     });
 
-    for (let userEl of document.querySelectorAll(".post-header, .post-header__user-name, .user-name")) {
+    appEl.querySelectorAll("[data-user-id]").forEach((userEl) => {
         userEl.addEventListener("click", () => {
             const uid = userEl.dataset.userId;
-            if (uid) {
-                goToPage(USER_POSTS_PAGE, { userId: uid });
-            }
+            if (uid) goToPage(USER_POSTS_PAGE, { userId: uid });
         });
-    }
+    });
 
-    document.querySelectorAll(".like-button").forEach((btn) => {
+    appEl.querySelectorAll(".like-button").forEach((btn) => {
         btn.addEventListener("click", () => {
             const postId = btn.dataset.postId;
             const ev = new CustomEvent("insta-like-click", { detail: { postId } });

@@ -1,7 +1,6 @@
 const personalKey = "x3im";
 const baseHost = "https://webdev-hw-api.vercel.app";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
-
 const API_BASE = baseHost;
 
 let _token = "";
@@ -10,6 +9,12 @@ export function setToken(token) {
     _token = token || "";
 }
 
+const buildAuthHeaders = (token) => {
+    const h = {};
+    if (token && typeof token === "string") h.Authorization = token;
+    return h;
+};
+
 export async function request(
     path,
     {method = "GET", body = undefined, signal} = {}
@@ -17,13 +22,7 @@ export async function request(
     const headers = {};
     if (_token) headers.Authorization = `Bearer ${_token}`;
 
-    const res = await fetch(`${API_BASE}${path}`, {
-        method,
-        headers,
-        body,
-        signal,
-    });
-
+    const res = await fetch(`${API_BASE}${path}`, {method, headers, body, signal});
     const text = await res.text();
     const json = text ? JSON.parse(text) : null;
 
@@ -34,42 +33,27 @@ export async function request(
         err.payload = json;
         throw err;
     }
-
     return json;
 }
 
 export function getPosts({token}) {
     return fetch(postsHost, {
         method: "GET",
-        headers: {
-            Authorization: token,
-        },
+        headers: buildAuthHeaders(token),
     })
         .then((response) => {
-            if (response.status === 401) {
-                throw new Error("Нет авторизации");
-            }
-
+            if (response.status === 401) throw new Error("Нет авторизации");
             return response.json();
         })
-        .then((data) => {
-            return data.posts;
-        });
+        .then((data) => data.posts);
 }
 
 export function registerUser({login, password, name, imageUrl}) {
     return fetch(baseHost + "/api/user", {
         method: "POST",
-        body: JSON.stringify({
-            login,
-            password,
-            name,
-            imageUrl,
-        }),
+        body: JSON.stringify({login, password, name, imageUrl}),
     }).then((response) => {
-        if (response.status === 400) {
-            throw new Error("Такой пользователь уже существует");
-        }
+        if (response.status === 400) throw new Error("Такой пользователь уже существует");
         return response.json();
     });
 }
@@ -77,14 +61,9 @@ export function registerUser({login, password, name, imageUrl}) {
 export function loginUser({login, password}) {
     return fetch(baseHost + "/api/user/login", {
         method: "POST",
-        body: JSON.stringify({
-            login,
-            password,
-        }),
+        body: JSON.stringify({login, password}),
     }).then((response) => {
-        if (response.status === 400) {
-            throw new Error("Неверный логин или пароль");
-        }
+        if (response.status === 400) throw new Error("Неверный логин или пароль");
         return response.json();
     });
 }
@@ -92,21 +71,16 @@ export function loginUser({login, password}) {
 export function uploadImage({file}) {
     const data = new FormData();
     data.append("file", file);
-
     return fetch(baseHost + "/api/upload/image", {
         method: "POST",
         body: data,
-    }).then((response) => {
-        return response.json();
-    });
+    }).then((response) => response.json());
 }
 
 export function addPost({description, imageUrl, token}) {
     return fetch(postsHost, {
         method: "POST",
-        headers: {
-            Authorization: token,
-        },
+        headers: buildAuthHeaders(token),
         body: JSON.stringify({description, imageUrl}),
     }).then(async (response) => {
         if (!response.ok) {
@@ -123,24 +97,71 @@ export function addPost({description, imageUrl, token}) {
     });
 }
 
-export function getUserPosts({userId, token}) {
-    const url = `${postsHost}/user-posts?userId=${encodeURIComponent(userId)}`;
-    return fetch(url, {
-        method: "GET",
-        headers: {Authorization: token},
-    })
-        .then((response) => {
-            if (response.status === 401) throw new Error("Нет авторизации");
-            return response.json();
-        })
-        .then((data) => data.posts);
+/**
+ * Загрузка постов пользователя:
+ * — Сначала /user-posts/:userId (правильный путь для этого API).
+ * — Если не получилось, пробуем ?userId=...
+ * — 404 => возвращаем [], чтобы страница открывалась без падения.
+ * — 401 => пробуем второй вариант, и только если оба дали 401 — бросаем «Нет авторизации».
+ */
+export async function getUserPosts({userId, token}) {
+    const headers = buildAuthHeaders(token);
+
+    const urls = [
+        `${postsHost}/user-posts/${encodeURIComponent(userId)}`,            // предпочтительный
+        `${postsHost}/user-posts?userId=${encodeURIComponent(userId)}`,     // запасной
+    ];
+
+    let saw401 = false;
+    let saw404 = false;
+    let lastMsg = "Не удалось загрузить посты пользователя";
+
+    for (const url of urls) {
+        try {
+            const res = await fetch(url, {method: "GET", headers});
+
+            if (res.ok) {
+                const data = await res.json();
+                return data.posts || [];
+            }
+
+            if (res.status === 401) {
+                saw401 = true;
+                continue;
+            }
+
+            if (res.status === 404) {
+                saw404 = true;
+                continue;
+            }
+
+            try {
+                const data = await res.json();
+                lastMsg = data?.message || data?.error || `Ошибка ${res.status}`;
+            } catch {
+                lastMsg = `Ошибка ${res.status}`;
+            }
+        } catch (e) {
+            lastMsg = e?.message || lastMsg;
+        }
+    }
+
+    if (saw404 && !saw401) {
+        return [];
+    }
+
+    if (saw401) {
+        throw new Error("Нет авторизации");
+    }
+
+    throw new Error(lastMsg);
 }
 
 export function toggleLike({postId, token}) {
     const url = `${postsHost}/${postId}/like`;
     return fetch(url, {
         method: "POST",
-        headers: {Authorization: token},
+        headers: buildAuthHeaders(token),
     }).then(async (response) => {
         if (!response.ok) {
             let msg = `Ошибка ${response.status}`;
