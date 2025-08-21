@@ -108,8 +108,8 @@ export async function getUserPosts({userId, token}) {
     const headers = buildAuthHeaders(token);
 
     const urls = [
-        `${postsHost}/user-posts/${encodeURIComponent(userId)}`,            // предпочтительный
-        `${postsHost}/user-posts?userId=${encodeURIComponent(userId)}`,     // запасной
+        `${postsHost}/user-posts/${encodeURIComponent(userId)}`,
+        `${postsHost}/user-posts?userId=${encodeURIComponent(userId)}`,
     ];
 
     let saw401 = false;
@@ -157,22 +157,28 @@ export async function getUserPosts({userId, token}) {
     throw new Error(lastMsg);
 }
 
-export function toggleLike({postId, token}) {
-    const url = `${postsHost}/${postId}/like`;
-    return fetch(url, {
-        method: "POST",
-        headers: buildAuthHeaders(token),
-    }).then(async (response) => {
-        if (!response.ok) {
-            let msg = `Ошибка ${response.status}`;
-            try {
-                const data = await response.json();
-                if (data?.error) msg = data.error;
-                if (data?.message) msg = data.message;
-            } catch {
-            }
-            throw new Error(msg);
-        }
-        return response.json().catch(() => null);
-    });
+export async function toggleLike({ postId, isLiked, token }) {
+    const headers = (function buildAuthHeaders(t) {
+        const h = {};
+        if (t && typeof t === "string") h.Authorization = t;
+        return h;
+    })(token);
+
+    const endpoint = isLiked
+        ? `${postsHost}/${postId}/dislike`
+        : `${postsHost}/${postId}/like`;
+
+    const res = await fetch(endpoint, { method: "POST", headers });
+
+    if (!res.ok) {
+        let msg = `Ошибка ${res.status}`;
+        try {
+            const data = await res.json();
+            msg = data?.message || data?.error || msg;
+        } catch {}
+        throw new Error(msg);
+    }
+
+    try { return await res.json(); } catch { return null; }
 }
+

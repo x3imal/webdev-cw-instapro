@@ -96,7 +96,8 @@ export function renderPostsPageComponent({ appEl }) {
     appEl.querySelectorAll(".like-button").forEach((btn) => {
         btn.addEventListener("click", () => {
             const postId = btn.dataset.postId;
-            const ev = new CustomEvent("insta-like-click", { detail: { postId } });
+            const isLiked = btn.getAttribute("aria-pressed") === "true";
+            const ev = new CustomEvent("insta-like-click", { detail: { postId, isLiked } });
             window.dispatchEvent(ev);
         });
     });

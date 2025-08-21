@@ -144,11 +144,11 @@ const renderApp = () => {
 };
 
 window.addEventListener("insta-like-click", async (e) => {
-    const {postId} = e.detail || {};
+    const {postId, isLiked} = e.detail || {};
     if (!postId) return;
 
     try {
-        await toggleLike({postId, token: getToken()});
+        await toggleLike({postId, isLiked, token: getToken()});
         if (page === USER_POSTS_PAGE && currentUserId) {
             await getUserPosts({userId: currentUserId, token: getToken()}).then(
                 (newPosts) => {
