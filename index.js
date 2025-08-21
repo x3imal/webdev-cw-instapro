@@ -38,22 +38,16 @@ export const logout = () => {
  */
 export const goToPage = (newPage, data) => {
     if (
-        [
-            POSTS_PAGE,
-            AUTH_PAGE,
-            ADD_POSTS_PAGE,
-            USER_POSTS_PAGE,
-            LOADING_PAGE,
-        ].includes(newPage)
+        [POSTS_PAGE, AUTH_PAGE, ADD_POSTS_PAGE, USER_POSTS_PAGE, LOADING_PAGE].includes(
+            newPage
+        )
     ) {
         if (newPage === ADD_POSTS_PAGE) {
-            /* Если пользователь не авторизован, то отправляем его на страницу авторизации перед добавлением поста */
             page = user ? ADD_POSTS_PAGE : AUTH_PAGE;
             return renderApp();
         }
 
         if (newPage === USER_POSTS_PAGE) {
-            // Получение постов конкретного пользователя
             page = LOADING_PAGE;
             renderApp();
 
@@ -67,8 +61,26 @@ export const goToPage = (newPage, data) => {
                 })
                 .catch((error) => {
                     console.error(error);
-                    // Если что-то пошло не так, вернемся в ленту
                     goToPage(POSTS_PAGE);
+                });
+        }
+
+        if (newPage === POSTS_PAGE) {
+            page = LOADING_PAGE;
+            renderApp();
+
+            return getPosts({token: getToken()})
+                .then((newPosts) => {
+                    posts = newPosts;
+                    page = POSTS_PAGE;
+                    renderApp();
+                })
+                .catch((error) => {
+                    console.error(error);
+                    // Отобразим пустую ленту, чтобы не зависнуть
+                    posts = [];
+                    page = POSTS_PAGE;
+                    renderApp();
                 });
         }
 
@@ -107,9 +119,9 @@ const renderApp = () => {
     if (page === ADD_POSTS_PAGE) {
         return renderAddPostPageComponent({
             appEl,
-            async onAddPostClick({ description, imageUrl }) {
+            async onAddPostClick({description, imageUrl}) {
                 try {
-                    await addPost({ description, imageUrl, token: getToken() });
+                    await addPost({description, imageUrl, token: getToken()});
                     goToPage(POSTS_PAGE);
                 } catch (e) {
                     alert(e.message || "Не удалось добавить пост");
@@ -127,24 +139,25 @@ const renderApp = () => {
     if (page === USER_POSTS_PAGE) {
         return renderPostsPageComponent({
             appEl,
-            });
+        });
     }
 };
 
 window.addEventListener("insta-like-click", async (e) => {
-    const { postId } = e.detail || {};
+    const {postId} = e.detail || {};
     if (!postId) return;
 
     try {
-        await toggleLike({ postId, token: getToken() });
-        // После успеха — обновим текущую страницу
+        await toggleLike({postId, token: getToken()});
         if (page === USER_POSTS_PAGE && currentUserId) {
-            await getUserPosts({ userId: currentUserId, token: getToken() }).then((newPosts) => {
-                posts = newPosts;
-                renderApp();
-            });
+            await getUserPosts({userId: currentUserId, token: getToken()}).then(
+                (newPosts) => {
+                    posts = newPosts;
+                    renderApp();
+                }
+            );
         } else {
-            await getPosts({ token: getToken() }).then((newPosts) => {
+            await getPosts({token: getToken()}).then((newPosts) => {
                 posts = newPosts;
                 renderApp();
             });
