@@ -1,20 +1,10 @@
-import {getPosts, getUserPosts, addPost, toggleLike} from "./api.js";
-import {renderAddPostPageComponent} from "./components/add-post-page-component.js";
-import {renderAuthPageComponent} from "./components/auth-page-component.js";
-import {
-    ADD_POSTS_PAGE,
-    AUTH_PAGE,
-    LOADING_PAGE,
-    POSTS_PAGE,
-    USER_POSTS_PAGE,
-} from "./routes.js";
-import {renderPostsPageComponent} from "./components/posts-page-component.js";
-import {renderLoadingPageComponent} from "./components/loading-page-component.js";
-import {
-    getUserFromLocalStorage,
-    removeUserFromLocalStorage,
-    saveUserToLocalStorage,
-} from "./helpers.js";
+import { addPost, deletePost, getPosts, getUserPosts, toggleLike } from "./api.js";
+import { renderAddPostPageComponent } from "./components/add-post-page-component.js";
+import { renderAuthPageComponent } from "./components/auth-page-component.js";
+import { ADD_POSTS_PAGE, AUTH_PAGE, LOADING_PAGE, POSTS_PAGE, USER_POSTS_PAGE } from "./routes.js";
+import { renderPostsPageComponent } from "./components/posts-page-component.js";
+import { renderLoadingPageComponent } from "./components/loading-page-component.js";
+import { getUserFromLocalStorage, removeUserFromLocalStorage, saveUserToLocalStorage } from "./helpers.js";
 
 export let user = getUserFromLocalStorage();
 export let page = null;
@@ -53,7 +43,7 @@ export const goToPage = (newPage, data) => {
 
             currentUserId = data?.userId ?? null;
 
-            return getUserPosts({userId: currentUserId, token: getToken()})
+            return getUserPosts({ userId: currentUserId, token: getToken() })
                 .then((newPosts) => {
                     page = USER_POSTS_PAGE;
                     posts = newPosts;
@@ -69,7 +59,7 @@ export const goToPage = (newPage, data) => {
             page = LOADING_PAGE;
             renderApp();
 
-            return getPosts({token: getToken()})
+            return getPosts({ token: getToken() })
                 .then((newPosts) => {
                     posts = newPosts;
                     page = POSTS_PAGE;
@@ -77,7 +67,6 @@ export const goToPage = (newPage, data) => {
                 })
                 .catch((error) => {
                     console.error(error);
-                    // Отобразим пустую ленту, чтобы не зависнуть
                     posts = [];
                     page = POSTS_PAGE;
                     renderApp();
@@ -119,9 +108,9 @@ const renderApp = () => {
     if (page === ADD_POSTS_PAGE) {
         return renderAddPostPageComponent({
             appEl,
-            async onAddPostClick({description, imageUrl}) {
+            async onAddPostClick({ description, imageUrl }) {
                 try {
-                    await addPost({description, imageUrl, token: getToken()});
+                    await addPost({ description, imageUrl, token: getToken() });
                     goToPage(POSTS_PAGE);
                 } catch (e) {
                     alert(e.message || "Не удалось добавить пост");
@@ -144,26 +133,60 @@ const renderApp = () => {
 };
 
 window.addEventListener("insta-like-click", async (e) => {
-    const {postId, isLiked} = e.detail || {};
+    const { postId, isLiked } = e.detail || {};
     if (!postId) return;
 
     try {
-        await toggleLike({postId, isLiked, token: getToken()});
+        await toggleLike({ postId, isLiked, token: getToken() });
         if (page === USER_POSTS_PAGE && currentUserId) {
-            await getUserPosts({userId: currentUserId, token: getToken()}).then(
+            await getUserPosts({ userId: currentUserId, token: getToken() }).then(
                 (newPosts) => {
                     posts = newPosts;
                     renderApp();
                 }
             );
         } else {
-            await getPosts({token: getToken()}).then((newPosts) => {
+            await getPosts({ token: getToken() }).then((newPosts) => {
                 posts = newPosts;
                 renderApp();
             });
         }
     } catch (err) {
         alert(err.message || "Не удалось обновить лайк");
+    }
+});
+
+window.addEventListener("insta-delete-click", async (e) => {
+    const { postId } = e.detail || {};
+    if (!postId) return;
+    if (!user || !user.token) {
+        alert("Войдите, чтобы удалить пост");
+        return;
+    }
+    if (!confirm("Удалить пост без возможности восстановления?")) return;
+
+    // Блокируем кнопку и показываем спиннер
+    const btn = document.querySelector(`.post-header__delete-button[data-post-id="${postId}"]`);
+    const originalHtml = btn?.innerHTML;
+    if (btn) {
+        btn.disabled = true;
+        btn.classList.add("is-loading");
+        btn.innerHTML = `<span class="spinner" aria-hidden="true"></span>Удаляю…`;
+    }
+
+    try {
+        await deletePost({ postId, token: getToken() });
+        posts = (page === USER_POSTS_PAGE && currentUserId)
+            ? await getUserPosts({ userId: currentUserId, token: getToken() })
+            : await getPosts({ token: getToken() });
+        renderApp();
+    } catch (err) {
+        if (btn) {
+            btn.disabled = false;
+            btn.classList.remove("is-loading");
+            btn.innerHTML = originalHtml ?? "Удалить";
+        }
+        alert(err.message || "Не удалось удалить пост");
     }
 });
 

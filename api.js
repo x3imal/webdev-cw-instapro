@@ -1,4 +1,4 @@
-const personalKey = "x3im";
+const personalKey = "x3imal";
 const baseHost = "https://webdev-hw-api.vercel.app";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
 const API_BASE = baseHost;
@@ -98,11 +98,7 @@ export function addPost({description, imageUrl, token}) {
 }
 
 /**
- * Загрузка постов пользователя:
- * — Сначала /user-posts/:userId (правильный путь для этого API).
- * — Если не получилось, пробуем ?userId=...
- * — 404 => возвращаем [], чтобы страница открывалась без падения.
- * — 401 => пробуем второй вариант, и только если оба дали 401 — бросаем «Нет авторизации».
+ * Загрузка постов пользователя (с запасными вариантами роутинга).
  */
 export async function getUserPosts({userId, token}) {
     const headers = buildAuthHeaders(token);
@@ -182,3 +178,20 @@ export async function toggleLike({ postId, isLiked, token }) {
     try { return await res.json(); } catch { return null; }
 }
 
+export async function deletePost({ postId, token }) {
+    const url = `${postsHost}/${postId}`;
+    const headers = {};
+    if (token && typeof token === "string") headers.Authorization = token;
+
+    const res = await fetch(url, { method: "DELETE", headers });
+
+    if (!res.ok) {
+        let msg = `Ошибка ${res.status}`;
+        try {
+            const data = await res.json();
+            msg = data?.message || data?.error || msg;
+        } catch {}
+        throw new Error(msg);
+    }
+    try { return await res.json(); } catch { return null; }
+}
