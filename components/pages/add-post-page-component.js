@@ -1,13 +1,17 @@
-import {renderHeaderComponent} from "./header-component.js";
-import {renderUploadImageComponent} from "./upload-image-component.js";
+import {renderHeaderComponent} from "../header/header-component.js";
+import {renderUploadImageComponent} from "../shared/upload-image-component.js";
+import {escapeHtml} from "../../lib/dom.js";
 
+/**
+ * Страница добавления поста.
+ * @param {{ appEl: HTMLElement, onAddPostClick: (args:{description:string,imageUrl:string})=>Promise<void> }} params
+ */
 export function renderAddPostPageComponent({appEl, onAddPostClick}) {
     let imageUrl = "";
     let description = "";
     let isSubmitting = false;
 
     const render = () => {
-
         const appHtml = `
       <div class="page-container">
         <div class="header-container"></div>
@@ -69,7 +73,7 @@ export function renderAddPostPageComponent({appEl, onAddPostClick}) {
                     description: description.trim(),
                     imageUrl,
                 });
-                // Навигацию назад в ленту делает index.js после успешного addPost
+                // Навигацию назад в ленту делает navigation.js после успешного addPost
             } catch (e) {
                 showError(e?.message || "Не удалось добавить пост");
             } finally {
@@ -78,7 +82,6 @@ export function renderAddPostPageComponent({appEl, onAddPostClick}) {
             }
         });
     };
-
 
     function canSubmit() {
         return Boolean(imageUrl && description.trim());
@@ -98,16 +101,6 @@ export function renderAddPostPageComponent({appEl, onAddPostClick}) {
 
     function clearError() {
         showError("");
-    }
-
-    function escapeHtml(s = "") {
-        return s.replace(/[&<>'"]/g, (c) => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            "'": "&#39;",
-            "\"": "&quot;"
-        }[c]));
     }
 
     render();
