@@ -1,37 +1,9 @@
-import {uploadImage} from "../api.js";
-
-function ensureActionStyles() {
-    if (document.getElementById("action-styles")) return; // уже вставлено постами
-    const style = document.createElement("style");
-    style.id = "action-styles";
-    style.textContent = `
-    .danger-btn {
-      display:inline-flex;align-items:center;gap:6px;
-      padding:6px 10px;font-size:14px;border-radius:8px;border:1px solid #e57373;background:#fff;color:#d32f2f;
-      cursor:pointer;transition:background .15s ease,border-color .15s ease,opacity .15s ease,transform .04s ease;
-    }
-    .danger-btn:hover { background:#ffebee;border-color:#ef5350; }
-    .danger-btn:active { transform:translateY(1px); }
-    .danger-btn:disabled { opacity:.6; cursor:not-allowed; }
-    .danger-btn .icon { width:16px;height:16px;display:inline-block }
-
-    .secondary-button {
-      display:inline-flex;align-items:center;gap:6px;padding:6px 10px;font-size:14px;border-radius:8px;
-      border:1px solid #d0d7de;background:#f6f8fa;color:#24292f;cursor:pointer;transition:background .15s ease,border-color .15s ease,transform .04s ease;
-    }
-    .secondary-button:hover { background:#eef2f6;border-color:#c0c7d0; }
-    .secondary-button:active { transform:translateY(1px); }
-    .secondary-button:disabled { opacity:.6; cursor:not-allowed; }
-
-    .spinner { width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;
-               display:inline-block;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:6px; }
-    @keyframes spin { to { transform: rotate(360deg) } }
-  `;
-    document.head.appendChild(style);
-}
+import {uploadImage} from "../../api/auth.js";
+import {ensureActionStyles} from "../../lib/dom.js";
 
 /**
  * Компонент загрузки изображения (опрятные кнопки + спиннер).
+ * @param {{ element: HTMLElement, onImageUrlChange: (url:string)=>void }} params
  */
 export function renderUploadImageComponent({element, onImageUrlChange}) {
     ensureActionStyles();
@@ -106,6 +78,7 @@ export function renderUploadImageComponent({element, onImageUrlChange}) {
             render();
         });
 
+        // Защита от клика по label во время аплоада
         element.querySelector(".file-upload-label")?.addEventListener("click", (e) => {
             if (isUploading) {
                 e.preventDefault();
