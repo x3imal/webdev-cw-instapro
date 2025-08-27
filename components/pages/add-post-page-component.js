@@ -13,32 +13,32 @@ export function renderAddPostPageComponent({appEl, onAddPostClick}) {
 
     const render = () => {
         const appHtml = `
-      <div class="page-container">
-        <div class="header-container"></div>
+    <div class="page-container">
+      <div class="header-container"></div>
 
-        <div class="form" style="max-width:640px;margin:0 auto;">
-          <h3 class="form-title">Новый пост</h3>
+      <div class="form form--narrow">
+        <h3 class="form-title">Новый пост</h3>
 
-          <div class="form-inputs" style="display:grid;gap:12px;">
-            <div class="upload-image-container"></div>
+        <div class="form-inputs form-inputs--spacious">
+          <div class="upload-image-container"></div>
 
-            <textarea
-              id="description-input"
-              class="input"
-              rows="3"
-              placeholder="Подпись к изображению"
-              maxlength="1000"
-            >${description ? escapeHtml(description) : ""}</textarea>
+          <textarea
+            id="description-input"
+            class="input"
+            rows="4"
+            placeholder="Подпись к изображению"
+            maxlength="1000"
+          >${description ? escapeHtml(description) : ""}</textarea>
 
-            <div class="form-error" id="add-form-error" style="min-height:20px;color:#b00020;"></div>
+          <div class="form-error form-error--inline" id="add-form-error"></div>
 
-            <button class="button" id="add-button" ${canSubmit() && !isSubmitting ? "" : "disabled"}>
-              ${isSubmitting ? "Публикую..." : "Опубликовать"}
-            </button>
-          </div>
+          <button class="button" id="add-button" ${canSubmit() && !isSubmitting ? "" : "disabled"}>
+            ${isSubmitting ? "Публикую..." : "Опубликовать"}
+          </button>
         </div>
       </div>
-    `;
+    </div>
+  `;
 
         appEl.innerHTML = appHtml;
 

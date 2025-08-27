@@ -28,32 +28,37 @@ export function renderPostsPageComponent({ appEl }) {
 
     const listHtml =
         state.posts.length === 0
-            ? `<li class="post post--empty">У пользователя пока нет постов.</li>`
-            : state.posts.map((post) => {
-                const isLiked = !!post.isLiked;
-                const postUser = post.user || {};
-                const postUserId = getUserId(postUser);
-                const isOwner = currentUserId && postUserId && postUserId === currentUserId;
+            ? `<li class="post post--empty">Пока нет ни одного поста.</li>`
+            : state.posts
+                .map((post) => {
+                    const isLiked = !!post.isLiked;
+                    const postUser = post.user || {};
+                    const postUserId = getUserId(postUser);
+                    const isOwner =
+                        currentUserId && postUserId && postUserId === currentUserId;
 
-                return `
+                    return `
   <li class="post" data-id="${post.id}">
     <div class="post-header" data-user-id="${postUserId}">
       <img src="${postUser.imageUrl}" class="post-header__user-image" alt="${escapeHtml(postUser.name || "")}">
       <p class="post-header__user-name" data-user-id="${postUserId}">
         ${escapeHtml(postUser.name || "")}${isOwner ? " (я)" : ""}
       </p>
-      ${isOwner ? `
+      ${
+                        isOwner
+                            ? `
         <button
           class="post-header__delete-button danger-btn"
           title="Удалить пост"
           data-post-id="${post.id}"
-          style="margin-left:auto"
         >
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
             <path fill="currentColor" d="M9 3h6a1 1 0 0 1 1 1v2h4v2h-1l-1.1 12.1A2 2 0 0 1 16.9 22H7.1a2 2 0 0 1-1.99-1.9L4 8H3V6h4V4a1 1 0 0 1 1-1Zm2 0v2h2V3h-2ZM6 8l1 12h10l1-12H6Zm4 3h2v7h-2v-7Zm4 0h2v7h-2v-7Zm-8 0h2v7H6v-7Z"/>
           </svg>
           Удалить
-        </button>` : ""}
+        </button>`
+                            : ""
+                    }
     </div>
 
     <div class="post-image-container">
@@ -79,7 +84,9 @@ export function renderPostsPageComponent({ appEl }) {
     </div>
 
     <p class="post-text">
-      <span class="user-name" data-user-id="${postUserId}">${escapeHtml(postUser.name || "")}</span>
+      <span class="user-name" data-user-id="${postUserId}">${escapeHtml(
+                        postUser.name || "",
+                    )}</span>
       ${escapeHtml(post.description || "")}
     </p>
 
@@ -88,16 +95,18 @@ export function renderPostsPageComponent({ appEl }) {
     </p>
   </li>
 `;
-            }).join("");
+                })
+                .join("");
 
     const appHtml = `
-    <div class="page-container">
-      <div class="header-container"></div>
-      <ul class="posts">
-        ${listHtml}
-      </ul>
-    </div>
-  `;
+  <div class="page-container">
+    <div class="header-container"></div>
+    <ul class="posts">
+      ${listHtml}
+    </ul>
+  </div>
+`;
+
 
     appEl.innerHTML = appHtml;
 
@@ -105,7 +114,6 @@ export function renderPostsPageComponent({ appEl }) {
         element: appEl.querySelector(".header-container"),
     });
 
-    // Переход на страницу постов пользователя
     appEl.querySelectorAll("[data-user-id]").forEach((userEl) => {
         userEl.addEventListener("click", () => {
             const uid = userEl.dataset.userId;
@@ -115,7 +123,6 @@ export function renderPostsPageComponent({ appEl }) {
         });
     });
 
-    // Делегируем лайк глобальному обработчику, чтобы централизованно обновлять ленту
     appEl.querySelectorAll(".like-button").forEach((btn) => {
         btn.addEventListener("click", () => {
             const postId = btn.dataset.postId;
@@ -125,7 +132,6 @@ export function renderPostsPageComponent({ appEl }) {
         });
     });
 
-    // Удаление поста (только для владельца)
     appEl.querySelectorAll(".post-header__delete-button").forEach((btn) => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -135,7 +141,6 @@ export function renderPostsPageComponent({ appEl }) {
         });
     });
 
-    // Навигация на USER_POSTS_PAGE
     window.addEventListener("insta-navigate-user", (e) => {
         const { userId } = e.detail || {};
         if (!userId) return;
@@ -143,4 +148,5 @@ export function renderPostsPageComponent({ appEl }) {
             goToPage(USER_POSTS_PAGE, { userId });
         });
     }, { once: true });
+
 }
