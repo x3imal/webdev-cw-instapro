@@ -1,14 +1,11 @@
 import { ADD_POSTS_PAGE, AUTH_PAGE, LOADING_PAGE, POSTS_PAGE, USER_POSTS_PAGE } from "./routes.js";
 import { state, getToken, setPage, setPosts, setUser, setCurrentUserId, clearAuth } from "./state.js";
 import { getPosts, getUserPosts, addPost } from "../api/posts.js";
-import { ensureActionStyles } from "../lib/dom.js";
 import { renderPostsPageComponent } from "../components/pages/posts-page-component.js";
 import { renderLoadingPageComponent } from "../components/pages/loading-page-component.js";
 import { renderAuthPageComponent } from "../components/pages/auth-page-component.js";
 import { renderAddPostPageComponent } from "../components/pages/add-post-page-component.js";
 import "./events.js";
-
-ensureActionStyles();
 
 /**
  * Переход на страницу приложения + загрузка данных при необходимости.

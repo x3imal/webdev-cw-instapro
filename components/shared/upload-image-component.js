@@ -1,13 +1,10 @@
-import {uploadImage} from "../../api/auth.js";
-import {ensureActionStyles} from "../../lib/dom.js";
+import { uploadImage } from "../../api/auth.js";
 
 /**
  * Компонент загрузки изображения (опрятные кнопки + спиннер).
  * @param {{ element: HTMLElement, onImageUrlChange: (url:string)=>void }} params
  */
-export function renderUploadImageComponent({element, onImageUrlChange}) {
-    ensureActionStyles();
-
+export function renderUploadImageComponent({ element, onImageUrlChange }) {
     let imageUrl = "";
     let isUploading = false;
 
@@ -43,7 +40,7 @@ export function renderUploadImageComponent({element, onImageUrlChange}) {
     </div>
   `;
 
-    const fileInput = element.querySelector(".file-upload-input");
+        const fileInput = element.querySelector(".file-upload-input");
 
         fileInput?.addEventListener("change", async () => {
             const file = fileInput.files?.[0];
@@ -53,7 +50,7 @@ export function renderUploadImageComponent({element, onImageUrlChange}) {
             render();
 
             try {
-                const {fileUrl} = await uploadImage({file});
+                const { fileUrl } = await uploadImage({ file });
                 imageUrl = fileUrl || "";
                 onImageUrlChange(imageUrl);
             } catch (e) {
