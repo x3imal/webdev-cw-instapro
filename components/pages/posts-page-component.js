@@ -1,7 +1,7 @@
 import { USER_POSTS_PAGE } from "../../app/routes.js";
 import { renderHeaderComponent } from "../header/header-component.js";
 import { state } from "../../app/state.js";
-import { escapeHtml, timeAgo, ensureActionStyles } from "../../lib/dom.js";
+import { escapeHtml, timeAgo } from "../../lib/dom.js";
 
 /**
  * Возвращает строковый id пользователя (пытается подобрать из разных полей).
@@ -22,8 +22,6 @@ function getUserId(u) {
  * @param {{ appEl: HTMLElement }} params
  */
 export function renderPostsPageComponent({ appEl }) {
-    ensureActionStyles();
-
     const currentUserId = getUserId(state.user);
 
     const listHtml =
@@ -34,8 +32,7 @@ export function renderPostsPageComponent({ appEl }) {
                     const isLiked = !!post.isLiked;
                     const postUser = post.user || {};
                     const postUserId = getUserId(postUser);
-                    const isOwner =
-                        currentUserId && postUserId && postUserId === currentUserId;
+                    const isOwner = currentUserId && postUserId && postUserId === currentUserId;
 
                     return `
   <li class="post" data-id="${post.id}">
@@ -84,9 +81,7 @@ export function renderPostsPageComponent({ appEl }) {
     </div>
 
     <p class="post-text">
-      <span class="user-name" data-user-id="${postUserId}">${escapeHtml(
-                        postUser.name || "",
-                    )}</span>
+      <span class="user-name" data-user-id="${postUserId}">${escapeHtml(postUser.name || "")}</span>
       ${escapeHtml(post.description || "")}
     </p>
 
@@ -107,7 +102,6 @@ export function renderPostsPageComponent({ appEl }) {
   </div>
 `;
 
-
     appEl.innerHTML = appHtml;
 
     renderHeaderComponent({
@@ -118,7 +112,7 @@ export function renderPostsPageComponent({ appEl }) {
         userEl.addEventListener("click", () => {
             const uid = userEl.dataset.userId;
             if (!uid) return;
-            const ev = new CustomEvent("insta-navigate-user", { detail: { userId: uid }});
+            const ev = new CustomEvent("insta-navigate-user", { detail: { userId: uid } });
             window.dispatchEvent(ev);
         });
     });
@@ -141,12 +135,15 @@ export function renderPostsPageComponent({ appEl }) {
         });
     });
 
-    window.addEventListener("insta-navigate-user", (e) => {
-        const { userId } = e.detail || {};
-        if (!userId) return;
-        import("../../app/navigation.js").then(({ goToPage }) => {
-            goToPage(USER_POSTS_PAGE, { userId });
-        });
-    }, { once: true });
-
+    window.addEventListener(
+        "insta-navigate-user",
+        (e) => {
+            const { userId } = e.detail || {};
+            if (!userId) return;
+            import("../../app/navigation.js").then(({ goToPage }) => {
+                goToPage(USER_POSTS_PAGE, { userId });
+            });
+        },
+        { once: true },
+    );
 }
