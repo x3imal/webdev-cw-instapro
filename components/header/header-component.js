@@ -20,9 +20,16 @@ export function renderHeaderComponent({ element }) {
       </button>
       ${
         state.user
-            ? `<button title="${state.user.name}" class="header-button logout-button">Выйти</button>`
+            ? `
+        <div class="user-info">
+            <span class="user-label">Вы вошли как:</span>
+            <span class="user-name">${state.user.name}</span>
+            <button class="header-button logout-button">Выйти</button>
+        </div>
+
+      ` 
             : ""
-    }  
+    }
   </div>
   `;
 

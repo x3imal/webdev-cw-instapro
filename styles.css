@@ -24,20 +24,38 @@
     margin-bottom: 8px;
 }
 
-.header-button {
-    padding: 0;
+.logout-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
     border: none;
-    background-color: transparent;
-    font-size: 14px;
-    line-height: 18px;
+    border-radius: 8px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
+    background: rgba(255, 255, 255, 0.24);
+    color: #000000;
+    transition: transform .06s, background .2s, box-shadow .2s, opacity .2s;
+    box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.08);
 }
 
-.logout-button {
-    width: 130px;
-    text-align: right;
+.logout-button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+    box-shadow: none;
 }
+
+.logout-button:not(:disabled):hover {
+    background: #000;
+}
+
+.logout-button:not(:disabled):active {
+    transform: translateY(1px);
+}
+
+
+
 
 /* === Posts list === */
 .posts {
@@ -167,15 +185,26 @@
 }
 
 .user-name {
-    color: #e11d48;
-    font-weight: 600;
+    color: #0034ff;
+    font-weight: 500;
     cursor: pointer;
+}
+
+.user-label {
+    color: #555;
+    font-weight: 400;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .user-name:hover { text-decoration: underline; }
 
 .user-name::after {
-    content: "\00A0 написал —\00A0";
+    content: "\00A0\00A0";
     color: #000000;
     font-weight: 400;
 }
@@ -354,7 +383,7 @@ textarea.input {
 .button:not(:disabled):active { transform: translateY(1px); }
 
 .link-auth {
-    color: #2563eb;       /* синий */
+    color: #2563eb;
     font-weight: 500;
     text-decoration: none;
     cursor: pointer;
@@ -362,3 +391,35 @@ textarea.input {
 .link-auth:hover {
     text-decoration: underline;
 }
+
+/* Общий стиль кнопок в хедере (Войти / Выйти) */
+.header-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;              /* меньше чем у .button */
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: #ffffff;
+    color: #000000;
+    transition: transform .06s, background .2s, box-shadow .2s, opacity .2s;
+    box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.08);
+}
+
+.header-button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.header-button:not(:disabled):hover {
+    background: #000;
+}
+
+.header-button:not(:disabled):active {
+    transform: translateY(1px);
+}
+
