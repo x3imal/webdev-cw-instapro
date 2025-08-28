@@ -52,7 +52,7 @@
     margin-top: 20px;
 }
 
-/* Пост-заглушка (не было в твоём файле) */
+/* Пост-заглушка */
 .post--empty {
     padding: 24px;
     text-align: center;
@@ -99,7 +99,7 @@
     line-height: 35px;
 }
 
-/* Кнопка удаления — добавлено (раньше была в компоненте) */
+/* Кнопка удаления — добавлено */
 .post-header__delete-button {
     display: inline-flex;
     align-items: center;
@@ -107,7 +107,6 @@
     margin-left: auto;
 }
 
-/* Универсальная опасная кнопка — добавлено */
 .danger-btn {
     background: #dc2626;
     color: #fff;
@@ -162,7 +161,6 @@
     cursor: pointer;
 }
 
-/* Картинка лайка — добавлено */
 .like-icon {
     width: 18px;
     height: 18px;
@@ -240,7 +238,6 @@
     text-align: center;
 }
 
-/* FIX: опечатка в названии класса (conrainer -> container) */
 .file-upload-image-container {
     display: flex;
     align-items: center;
@@ -307,7 +304,6 @@
 .form--narrow { max-width: 640px; margin: 0 auto; }
 .form-inputs--spacious { display: grid; gap: 12px; }
 
-/* Контейнер, куда монтируется виджет загрузки */
 .upload-image-container { display: grid; justify-content: center; }
 
 /* === Inputs / Textarea === */
@@ -329,7 +325,7 @@
 }
 textarea.input {
     resize: vertical;
-    min-height: 120px; /* чуть выше дефолта */
+    min-height: 120px;
 }
 
 /* === Error line === */

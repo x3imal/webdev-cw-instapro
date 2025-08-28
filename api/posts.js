@@ -48,52 +48,42 @@ export function addPost({description, imageUrl, token}) {
 
 /**
  * Загрузка постов конкретного пользователя.
- * Пробует несколько вариантов маршрута на бэке.
  * @param {{ userId: string, token?: string }} params
  * @returns {Promise<Array>} posts ([] если 404)
  * @throws {Error} при 401 или сетевой ошибке
  */
-export async function getUserPosts({userId, token}) {
+export async function getUserPosts({ userId, token }) {
     const headers = buildAuthHeaders(token);
-    const urls = [
-        `${postsHost}/user-posts/${encodeURIComponent(userId)}`,
-        `${postsHost}/user-posts?userId=${encodeURIComponent(userId)}`,
-    ];
+    const url = `${postsHost}/user-posts/${encodeURIComponent(userId)}`;
 
-    let saw401 = false;
-    let saw404 = false;
-    let lastMsg = "Не удалось загрузить посты пользователя";
+    try {
+        const res = await fetch(url, { method: "GET", headers });
 
-    for (const url of urls) {
-        try {
-            const res = await fetch(url, {method: "GET", headers});
-            if (res.ok) {
-                const data = await res.json();
-                return data.posts || [];
-            }
-            if (res.status === 401) {
-                saw401 = true;
-                continue;
-            }
-            if (res.status === 404) {
-                saw404 = true;
-                continue;
-            }
-            try {
-                const data = await res.json();
-                lastMsg = data?.message || data?.error || `Ошибка ${res.status}`;
-            } catch {
-                lastMsg = `Ошибка ${res.status}`;
-            }
-        } catch (e) {
-            lastMsg = e?.message || lastMsg;
+        if (res.ok) {
+            const data = await res.json();
+            return data.posts || [];
         }
-    }
 
-    if (saw404 && !saw401) return [];
-    if (saw401) throw new Error("Нет авторизации");
-    throw new Error(lastMsg);
+        if (res.status === 401) {
+            throw new Error("Нет авторизации");
+        }
+
+        if (res.status === 404) {
+            return [];
+        }
+
+        let msg = `Ошибка ${res.status}`;
+        try {
+            const data = await res.json();
+            msg = data?.message || data?.error || msg;
+        } catch {}
+        throw new Error(msg);
+
+    } catch (e) {
+        throw new Error(e?.message || "Не удалось загрузить посты пользователя");
+    }
 }
+
 
 /**
  * Переключает лайк/дизлайк на посте.

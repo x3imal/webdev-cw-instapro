@@ -6,9 +6,8 @@ import { renderPostsPageComponent } from "../components/pages/posts-page-compone
 import { renderLoadingPageComponent } from "../components/pages/loading-page-component.js";
 import { renderAuthPageComponent } from "../components/pages/auth-page-component.js";
 import { renderAddPostPageComponent } from "../components/pages/add-post-page-component.js";
-import "./events.js"; // подключаем глобальные обработчики событий (лайк/удаление)
+import "./events.js";
 
-// Инициализация глобальных стилей для action‑кнопок/спиннера один раз
 ensureActionStyles();
 
 /**
@@ -114,5 +113,4 @@ export function logout() {
     goToPage(POSTS_PAGE);
 }
 
-// Старт приложения
 goToPage(POSTS_PAGE);

@@ -73,7 +73,6 @@ export function renderAddPostPageComponent({appEl, onAddPostClick}) {
                     description: description.trim(),
                     imageUrl,
                 });
-                // Навигацию назад в ленту делает navigation.js после успешного addPost
             } catch (e) {
                 showError(e?.message || "Не удалось добавить пост");
             } finally {

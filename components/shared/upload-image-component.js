@@ -78,7 +78,6 @@ export function renderUploadImageComponent({element, onImageUrlChange}) {
             render();
         });
 
-        // Защита от клика по label во время аплоада
         element.querySelector(".file-upload-label")?.addEventListener("click", (e) => {
             if (isUploading) {
                 e.preventDefault();
