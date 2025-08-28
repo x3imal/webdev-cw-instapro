@@ -26,7 +26,6 @@ export function renderHeaderComponent({ element }) {
   </div>
   `;
 
-    // Делегируем навигацию
     element.querySelector(".add-or-login-button").addEventListener("click", () => {
         if (state.user) goToPage(ADD_POSTS_PAGE);
         else goToPage(AUTH_PAGE);

@@ -6,22 +6,6 @@ export const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
 let _token = "";
 
 /**
- * Устанавливает токен авторизации для всех запросов (Bearer ...).
- * @param {string} token — токен без префикса Bearer
- */
-export function setToken(token) {
-    _token = token ? `Bearer ${token}` : "";
-}
-
-/**
- * Возвращает текущий токен (с префиксом Bearer) или пустую строку.
- * @returns {string}
- */
-export function getAuthHeader() {
-    return _token;
-}
-
-/**
  * Универсальный запрос к API.
  * Маппит не‑2xx ответы в Error с сообщением сервера (если есть).
  * @param {string} path — абсолютный путь после API_BASE
