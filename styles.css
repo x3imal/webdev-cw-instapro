@@ -46,10 +46,6 @@
     box-shadow: none;
 }
 
-.logout-button:not(:disabled):hover {
-    background: #000;
-}
-
 .logout-button:not(:disabled):active {
     transform: translateY(1px);
 }
@@ -201,7 +197,7 @@
     gap: 10px;
 }
 
-.user-name:hover { text-decoration: underline; }
+.user-name:hover { text-decoration: none; }
 
 .user-name::after {
     content: "\00A0\00A0";
@@ -379,7 +375,7 @@ textarea.input {
     box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 4px 14px rgba(0,0,0,.08);
 }
 .button:disabled { opacity: .6; cursor: not-allowed; box-shadow: none; }
-.button:not(:disabled):hover { background: #000; }
+.button:not(:disabled):hover { background: #ff6060; }
 .button:not(:disabled):active { transform: translateY(1px); }
 
 .link-auth {
@@ -397,14 +393,14 @@ textarea.input {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 12px;              /* меньше чем у .button */
-    border: none;
-    border-radius: 8px;
+    padding: 6px 12px;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    background: #ffffff;
+    border-radius: 5px;
+    background-color: transparent;
     color: #000000;
+    border: none;
     transition: transform .06s, background .2s, box-shadow .2s, opacity .2s;
     box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.08);
 }
@@ -416,7 +412,8 @@ textarea.input {
 }
 
 .header-button:not(:disabled):hover {
-    background: #000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
+    transform: translateY(-2px);
 }
 
 .header-button:not(:disabled):active {
