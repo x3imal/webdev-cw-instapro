@@ -1,4 +1,4 @@
-import { loadUser, saveUser, removeUser } from "../lib/storage.js";
+import { loadUser, saveUser, removeUser } from "./lib/storage.js";
 
 /**
  * Глобальное состояние приложения (простой in‑memory стор).

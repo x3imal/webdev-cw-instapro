@@ -1,6 +1,6 @@
-import { goToPage, logout } from "../../app/navigation.js";
-import { state } from "../../app/state.js";
-import { ADD_POSTS_PAGE, AUTH_PAGE, POSTS_PAGE } from "../../app/routes.js";
+import { goToPage, logout } from "../../navigation.js";
+import { state } from "../../state.js";
+import { ADD_POSTS_PAGE, AUTH_PAGE, POSTS_PAGE } from "../../routes.js";
 
 /**
  * Компонент заголовка (логотип, добавить/войти, выйти).

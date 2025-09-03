@@ -1,4 +1,4 @@
-import {toggleLike, deletePost, getPosts, getUserPosts} from "../api/posts.js";
+import {toggleLike, deletePost, getPosts, getUserPosts} from "./api/posts.js";
 import {getToken, state, setPosts} from "./state.js";
 import {USER_POSTS_PAGE} from "./routes.js";
 import {renderApp} from "./navigation.js";
