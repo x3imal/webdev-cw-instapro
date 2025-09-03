@@ -1,6 +1,6 @@
-import { USER_POSTS_PAGE } from "../../app/routes.js";
+import { USER_POSTS_PAGE } from "../../routes.js";
 import { renderHeaderComponent } from "../header/header-component.js";
-import { state } from "../../app/state.js";
+import { state } from "../../state.js";
 import { escapeHtml, timeAgo } from "../../lib/dom.js";
 
 /**
@@ -140,7 +140,7 @@ export function renderPostsPageComponent({ appEl }) {
         (e) => {
             const { userId } = e.detail || {};
             if (!userId) return;
-            import("../../app/navigation.js").then(({ goToPage }) => {
+            import("../../navigation.js").then(({ goToPage }) => {
                 goToPage(USER_POSTS_PAGE, { userId });
             });
         },
